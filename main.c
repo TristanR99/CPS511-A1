@@ -144,15 +144,21 @@ void display(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Draw Drone
-
 	// Set drone material properties
 	glMaterialfv(GL_FRONT, GL_AMBIENT, drone_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, drone_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, drone_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, drone_mat_shininess);
 
+	glPushMatrix();
+
+	glTranslatef(sub_motion, 4.0, 0.0);
+	
+	glRotatef(rotate_degree, 0.0, 1.0, 0.0);
+	
 	drawSub();
+	
+	glPopMatrix();
 
 	// Draw ground mesh
 	DrawMeshQM(&groundMesh, meshSize);
@@ -167,8 +173,6 @@ void drawSub(void) {
 void drawBody(void) {
 	// Creates body of sub
 	glPushMatrix();
-	glTranslatef(sub_motion, 4.0, 0.0);
-	glRotatef(rotate_degree, 0.0, 1.0, 0.0);
 	glScalef(6.0, 1.0, 1.0);
 	glutSolidSphere(1.0, 360, 360);
 	glPopMatrix();
@@ -176,9 +180,8 @@ void drawBody(void) {
 
 void drawPropeller(void) {
 
-	// Creates propeller of sub
 	glPushMatrix();
-	glTranslatef(6.0 + sub_motion, 4.0, 0.0);
+	glTranslatef(6.0, 0.0, 0.0);
 	glRotatef(90, 0.0, 1.0, 0.0);
 	glRotatef(prop_rotate_degree_update, 0.0, 0.0, 1.0);
 	glScalef(0.1, 1.0, 0.5);
