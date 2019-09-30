@@ -9,16 +9,21 @@
 #include "Vector3D.h"
 #include "QuadMesh.h"
 
+# define M_PI 3.14159265358979323846
+
 const int meshSize = 16;    // Default Mesh Size
 const int vWidth = 650;     // Viewport width in pixels
 const int vHeight = 500;    // Viewport height in pixels
 
+static double xPos = 0.0;
+static double yPos = 0.0;
 static int isON = 0;
 static int currentButton;
 static unsigned char currentKey;
 static double rotate_degree = 0.0;
 static double prop_rotate_degree_update = 0.0;
-static double sub_motion = 0.0;
+static double sub_motion_h = 0.0;
+static double sub_motion_v = 0.0;
 
 // Lighting/shading and material properties for drone - upcoming lecture - just copy for now
 
@@ -152,8 +157,8 @@ void display(void)
 
 	glPushMatrix();
 
-	glTranslatef(sub_motion, 4.0, 0.0);
-	
+	glTranslatef(xPos, sub_motion_v+4.0, yPos);
+
 	glRotatef(rotate_degree, 0.0, 1.0, 0.0);
 	
 	drawSub();
@@ -213,11 +218,16 @@ void keyboard(unsigned char key, int x, int y)
 {
 	if (key == 's')
 		isON = !isON;
-	else if (key == 'f')
-		sub_motion -= 0.5;
-	else if (key == 'b')
-		sub_motion += 0.5;
-	
+	else if (key == 'f'){
+		sub_motion_h -= 0.5;
+		xPos -= cosf((-rotate_degree * M_PI) / 180);
+		yPos -= sinf((-rotate_degree * M_PI) / 180);
+	}
+	else if (key == 'b') {
+		sub_motion_h += 0.5;
+		xPos += cosf((-rotate_degree * M_PI) / 180);
+		yPos += sinf((-rotate_degree * M_PI) / 180);
+	}
 	glutPostRedisplay();   // Trigger a window redisplay
 }
 
@@ -225,10 +235,14 @@ void keyboard(unsigned char key, int x, int y)
 void functionKeys(int key, int x, int y)
 {
 
-	if(key == GLUT_KEY_LEFT)
-		rotate_degree += 10;
-	else if(key == GLUT_KEY_RIGHT)
+	if (key == GLUT_KEY_LEFT)
+		rotate_degree += 10;	
+	else if (key == GLUT_KEY_RIGHT)
 		rotate_degree -= 10;
+	else if (key == GLUT_KEY_UP)
+		sub_motion_v += 0.5;
+	else if (key == GLUT_KEY_DOWN)
+		sub_motion_v -= 0.5;
 
 	glutPostRedisplay();   // Trigger a window redisplay
 }
