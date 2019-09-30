@@ -16,7 +16,7 @@ const int vWidth = 650;     // Viewport width in pixels
 const int vHeight = 500;    // Viewport height in pixels
 
 static double xPos = 0.0;
-static double yPos = 0.0;
+static double zPos = 0.0;
 static int isON = 0;
 static int currentButton;
 static unsigned char currentKey;
@@ -58,6 +58,7 @@ void mouseMotionHandler(int xMouse, int yMouse);
 void keyboard(unsigned char key, int x, int y);
 void functionKeys(int key, int x, int y);
 void timer(int value);
+void instructions(void);
 Vector3D ScreenToWorld(int x, int y);
 
 void drawSub(void);
@@ -155,14 +156,24 @@ void display(void)
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, drone_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, drone_mat_shininess);
 
+	//Push (copy) current CTM to matrix stack
 	glPushMatrix();
 
-	glTranslatef(xPos, sub_motion_v+4.0, yPos);
+	//T1: Translate the sub:
+	// xPos in the X direction
+	// sub_motion_v + 4.0 in the Y direction
+	// zPos in the Z direction
+	//CTM = T1
+	glTranslatef(xPos, sub_motion_v+4.0, zPos);
 
+	//R1: Rotate the sub upon the Y axis by "rotate_degree" degrees
+	//CTM = T1 * R1
 	glRotatef(rotate_degree, 0.0, 1.0, 0.0);
 	
+	//Draw submarine's individual parts using the default CTM
 	drawSub();
 	
+	//Pop the original CTM from line 159 back in
 	glPopMatrix();
 
 	// Draw ground mesh
@@ -177,20 +188,47 @@ void drawSub(void) {
 
 void drawBody(void) {
 	// Creates body of sub
+
+	//Copy CTM onto matrix stack
 	glPushMatrix();
+
+	//S1: Scale the body of the sub 
+	//CTM: T1 * R1 * S1
 	glScalef(6.0, 1.0, 1.0);
-	glutSolidSphere(1.0, 360, 360);
+	
+	//Draw the body of the sub using the CTM specified above
+	glutSolidSphere(1.0, 40, 40);
+
+	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
 }
 
 void drawPropeller(void) {
+	//Creates Propeller
 
+	//Cope CTM onto matrix stack
 	glPushMatrix();
+
+	//T2: Translate the propeller 6 units relative to the origin of the sub
+	//CTM: T1 * R1 * T2
 	glTranslatef(6.0, 0.0, 0.0);
+	
+	//R2: Rotate the propeller so that it aligns with the rear of the sub
+	//CTM: T1 * R1 * T2 * R2
 	glRotatef(90, 0.0, 1.0, 0.0);
+
+	//R3: Responsible for animation of the propeller via the "ptop_rotate_degree_update" global variable
+	//CTM: T1 * R1 * T2 * R2 * R3
 	glRotatef(prop_rotate_degree_update, 0.0, 0.0, 1.0);
+	
+	//S1: Scale the propeller so that it looks desirable
+	//CTM: T1 * R1 * T2 * R2 * R3 * S1
 	glScalef(0.1, 1.0, 0.5);
+	
+	//Draw the propeller
 	glutSolidCube(2.0);
+	
+	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
 }
 
@@ -221,12 +259,12 @@ void keyboard(unsigned char key, int x, int y)
 	else if (key == 'f'){
 		sub_motion_h -= 0.5;
 		xPos -= cosf((-rotate_degree * M_PI) / 180);
-		yPos -= sinf((-rotate_degree * M_PI) / 180);
+		zPos -= sinf((-rotate_degree * M_PI) / 180);
 	}
 	else if (key == 'b') {
 		sub_motion_h += 0.5;
 		xPos += cosf((-rotate_degree * M_PI) / 180);
-		yPos += sinf((-rotate_degree * M_PI) / 180);
+		zPos += sinf((-rotate_degree * M_PI) / 180);
 	}
 	glutPostRedisplay();   // Trigger a window redisplay
 }
@@ -236,17 +274,21 @@ void functionKeys(int key, int x, int y)
 {
 
 	if (key == GLUT_KEY_LEFT)
-		rotate_degree += 10;	
+		rotate_degree += 10;
 	else if (key == GLUT_KEY_RIGHT)
 		rotate_degree -= 10;
 	else if (key == GLUT_KEY_UP)
 		sub_motion_v += 0.5;
 	else if (key == GLUT_KEY_DOWN)
 		sub_motion_v -= 0.5;
-
+	else if (key == GLUT_KEY_F1)
+		instructions();
 	glutPostRedisplay();   // Trigger a window redisplay
 }
 
+void instructions(void) {
+	printf(" Controls: \n Up: Up arrow key \n Down: Down arrow key \n Rotate right: Right arrow key \n Rotate left: Left arrow key \n Forward: 'f' \n Backward: 'b' \n Toggle propeller: 's' \n");
+}
 
 // Mouse button callback - use only if you want to 
 void mouse(int button, int state, int x, int y)
