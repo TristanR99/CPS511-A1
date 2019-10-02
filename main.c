@@ -18,6 +18,7 @@ const int vHeight = 500;    // Viewport height in pixels
 static double xPos = 0.0;
 static double zPos = 0.0;
 static int isON = 0;
+static int direction = 1;
 static int currentButton;
 static unsigned char currentKey;
 static double rotate_degree = 0.0;
@@ -43,6 +44,9 @@ static GLfloat drone_mat_shininess[] = { 0.0F };
 // A quad mesh representing the ground
 static QuadMesh groundMesh;
 
+// A cylinder for the tower of the sub
+static GLUquadricObj *tower;
+
 // Structure defining a bounding box, currently unused
 //struct BoundingBox {
 //    Vector3D min;
@@ -64,6 +68,7 @@ Vector3D ScreenToWorld(int x, int y);
 void drawSub(void);
 void drawBody(void);
 void drawPropeller(void);
+void drawTower(void);
 
 int main(int argc, char** argv)
 {
@@ -139,7 +144,11 @@ void initOpenGL(int w, int h)
 
 void timer(int value) {
 	if (isON)
+		if(direction == 1)
 		prop_rotate_degree_update += 10;
+		else
+		prop_rotate_degree_update -= 10;
+
 	glutTimerFunc(16, *timer, 0);
 	glutPostRedisplay();
 }
@@ -184,6 +193,7 @@ void display(void)
 void drawSub(void) {
 	drawBody();
 	drawPropeller();
+	drawTower();
 }
 
 void drawBody(void) {
@@ -197,7 +207,7 @@ void drawBody(void) {
 	glScalef(6.0, 1.0, 1.0);
 	
 	//Draw the body of the sub using the CTM specified above
-	glutSolidSphere(1.0, 40, 40);
+	glutSolidSphere(1.0, 60, 60);
 
 	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
@@ -232,6 +242,23 @@ void drawPropeller(void) {
 	glPopMatrix();
 }
 
+void drawTower(void){
+	glPushMatrix();
+
+	glTranslatef(0.0, 0.2, 0.0);
+
+	glRotatef(-90, 1.0, 0.0, 0.0);
+
+	glScalef(1.0, 0.4, 1.0);
+	
+	tower = gluNewQuadric();
+	gluQuadricDrawStyle(tower, GLU_LINE);
+	gluCylinder(tower, 2.0, 1.5, 2.0, 1000, 1000);
+
+	glPopMatrix();
+
+}
+
 
 // Callback, called at initialization and whenever user resizes the window.
 void reshape(int w, int h)
@@ -257,11 +284,13 @@ void keyboard(unsigned char key, int x, int y)
 	if (key == 's')
 		isON = !isON;
 	else if (key == 'f'){
+		direction = 1;
 		sub_motion_h -= 0.5;
 		xPos -= cosf((-rotate_degree * M_PI) / 180);
 		zPos -= sinf((-rotate_degree * M_PI) / 180);
 	}
 	else if (key == 'b') {
+		direction = -1;
 		sub_motion_h += 0.5;
 		xPos += cosf((-rotate_degree * M_PI) / 180);
 		zPos += sinf((-rotate_degree * M_PI) / 180);
