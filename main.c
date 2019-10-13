@@ -11,6 +11,7 @@
 
 # define M_PI 3.14159265358979323846
 
+
 const int meshSize = 16;    // Default Mesh Size
 const int vWidth = 650;     // Viewport width in pixels
 const int vHeight = 500;    // Viewport height in pixels
@@ -157,6 +158,7 @@ void timer(int value) {
 // or glutPostRedisplay() has been called.
 void display(void)
 {
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Set drone material properties
@@ -192,8 +194,8 @@ void display(void)
 
 void drawSub(void) {
 	drawBody();
-	drawPropeller();
-	drawTower();
+	//drawPropeller();
+	//drawTower();
 }
 
 void drawBody(void) {
@@ -209,6 +211,8 @@ void drawBody(void) {
 	//Draw the body of the sub using the CTM specified above
 	glutSolidSphere(1.0, 60, 60);
 
+	drawPropeller();
+
 	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
 }
@@ -221,7 +225,7 @@ void drawPropeller(void) {
 
 	//T2: Translate the propeller 6 units relative to the origin of the sub
 	//CTM: T1 * R1 * T2
-	glTranslatef(6.0, 0.0, 0.0);
+	glTranslatef(1.0, 0.0, 0.0);
 	
 	//R2: Rotate the propeller so that it aligns with the rear of the sub
 	//CTM: T1 * R1 * T2 * R2
@@ -233,7 +237,7 @@ void drawPropeller(void) {
 	
 	//S1: Scale the propeller so that it looks desirable
 	//CTM: T1 * R1 * T2 * R2 * R3 * S1
-	glScalef(0.1, 1.0, 0.5);
+	glScalef(0.1, 1.0, 0.1);
 	
 	//Draw the propeller
 	glutSolidCube(2.0);
