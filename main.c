@@ -171,9 +171,10 @@ void display(void)
 	glPushMatrix();
 
 	//T1: Translate the sub:
-	// xPos in the X direction
-	// sub_motion_v + 4.0 in the Y direction
-	// zPos in the Z direction
+		// xPos in the X direction
+		// sub_motion_v + 4.0 in the Y direction
+		// zPos in the Z direction
+	//xPos, sub_motion_v and zPos are global variables that are mutated by key presses
 	//CTM = T1
 	glTranslatef(xPos, sub_motion_v+4.0, zPos);
 
@@ -181,7 +182,7 @@ void display(void)
 	//CTM = T1 * R1
 	glRotatef(rotate_degree, 0.0, 1.0, 0.0);
 	
-	//Draw submarine's individual parts using the default CTM
+	//Draw submarine's individual parts using the default CTM defined above
 	drawSub();
 	
 	//Pop the original CTM from line 159 back in
@@ -194,8 +195,6 @@ void display(void)
 
 void drawSub(void) {
 	drawBody();
-	//drawPropeller();
-	//drawTower();
 }
 
 void drawBody(void) {
@@ -211,7 +210,11 @@ void drawBody(void) {
 	//Draw the body of the sub using the CTM specified above
 	glutSolidSphere(1.0, 60, 60);
 
+	//draw the propeller in relation to the body
 	drawPropeller();
+
+	//draw the tower in relation to the body
+	drawTower();
 
 	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
@@ -253,7 +256,7 @@ void drawTower(void){
 
 	glRotatef(-90, 1.0, 0.0, 0.0);
 
-	glScalef(1.0, 0.4, 1.0);
+	glScalef(0.2, 0.4, 1.0);
 	
 	tower = gluNewQuadric();
 	gluQuadricDrawStyle(tower, GLU_LINE);
