@@ -12,7 +12,7 @@
 # define M_PI 3.14159265358979323846
 
 
-const int meshSize = 16;    // Default Mesh Size
+const int meshSize = 160;    // Default Mesh Size
 const int vWidth = 650;     // Viewport width in pixels
 const int vHeight = 500;    // Viewport height in pixels
 
@@ -70,6 +70,7 @@ void drawSub(void);
 void drawBody(void);
 void drawPropeller(void);
 void drawTower(void);
+void drawPropellerCover(void);
 
 int main(int argc, char** argv)
 {
@@ -126,11 +127,11 @@ void initOpenGL(int w, int h)
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);   // Nicer perspective
 
 	// Set up ground quad mesh
-	Vector3D origin = NewVector3D(-8.0f, 0.0f, 8.0f);
-	Vector3D dir1v = NewVector3D(1.0f, 0.0f, 0.0f);
-	Vector3D dir2v = NewVector3D(0.0f, 0.0f, -1.0f);
+	Vector3D origin = NewVector3D(-80.0f, 0.0f, 8.0f);
+	Vector3D dir1v = NewVector3D(1.0f, 0.0f, 1.0f);
+	Vector3D dir2v = NewVector3D(1.0f, 0.0f, -1.0f);
 	groundMesh = NewQuadMesh(meshSize);
-	InitMeshQM(&groundMesh, meshSize, origin, 16.0, 16.0, dir1v, dir2v);
+	InitMeshQM(&groundMesh, meshSize, origin, 160.0, 160.0, dir1v, dir2v);
 
 	Vector3D ambient = NewVector3D(0.0f, 0.05f, 0.0f);
 	Vector3D diffuse = NewVector3D(0.4f, 0.8f, 0.4f);
@@ -216,6 +217,8 @@ void drawBody(void) {
 	//draw the tower in relation to the body
 	drawTower();
 
+	drawPropellerCover();
+
 	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
 }
@@ -244,8 +247,24 @@ void drawPropeller(void) {
 	
 	//Draw the propeller
 	glutSolidCube(2.0);
-	
+
 	//Pop back default matrix CTM: T1 * R1
+	glPopMatrix();
+}
+
+void drawPropellerCover(void) {
+	glPushMatrix();
+
+	glTranslatef(1.0, 0.0, 0.0);
+
+	glRotatef(90, 0.0, 0.0, 1.0);
+
+	glRotatef(90, 1.0, 0.0, 0.0);
+
+	glScalef(1.0, 1.0, 0.3);
+
+	glutSolidTorus(0.3, 1.5, 10, 50);
+
 	glPopMatrix();
 }
 
