@@ -8,6 +8,7 @@
 #include <gl/glut.h>
 #include "Vector3D.h"
 #include "QuadMesh.h"
+#include "CubeMesh.h"
 
 # define M_PI 3.14159265358979323846
 
@@ -44,6 +45,7 @@ static GLfloat drone_mat_shininess[] = { 0.0F };
 
 // A quad mesh representing the ground
 static QuadMesh groundMesh;
+static CubeMesh cube;
 
 // A cylinder for the tower of the sub
 static GLUquadricObj *tower;
@@ -71,6 +73,7 @@ void drawBody(void);
 void drawPropeller(void);
 void drawTower(void);
 void drawPropellerCover(void);
+void drawFins(void);
 
 int main(int argc, char** argv)
 {
@@ -191,6 +194,10 @@ void display(void)
 
 	// Draw ground mesh
 	DrawMeshQM(&groundMesh, meshSize);
+
+	cube = newCube();
+	drawCube(&cube);
+
 	glutSwapBuffers();   // Double buffering, swap buffers
 }
 
@@ -217,7 +224,11 @@ void drawBody(void) {
 	//draw the tower in relation to the body
 	drawTower();
 
+	//draw the propeller cover in relation to the body
 	drawPropellerCover();
+
+	//draw the fins in relation to the body
+	drawFins();
 
 	//Pop back default matrix CTM: T1 * R1
 	glPopMatrix();
@@ -230,39 +241,50 @@ void drawPropeller(void) {
 	glPushMatrix();
 
 	//T2: Translate the propeller 6 units relative to the origin of the sub
-	//CTM: T1 * R1 * T2
+	//CTM: T1 * R1 * S1 * T2
 	glTranslatef(1.0, 0.0, 0.0);
 	
 	//R2: Rotate the propeller so that it aligns with the rear of the sub
-	//CTM: T1 * R1 * T2 * R2
+	//CTM: T1 * R1 * S1 * T2 * R2
 	glRotatef(90, 0.0, 1.0, 0.0);
 
 	//R3: Responsible for animation of the propeller via the "ptop_rotate_degree_update" global variable
-	//CTM: T1 * R1 * T2 * R2 * R3
+	//CTM: T1 * R1 * S1 * T2 * R2 * R3
 	glRotatef(prop_rotate_degree_update, 0.0, 0.0, 1.0);
 	
-	//S1: Scale the propeller so that it looks desirable
-	//CTM: T1 * R1 * T2 * R2 * R3 * S1
+	//S2: Scale the propeller so that it looks desirable
+	//CTM: T1 * R1 * S1 * T2 * R2 * R3 * S2
 	glScalef(0.1, 1.0, 0.1);
 	
 	//Draw the propeller
 	glutSolidCube(2.0);
 
-	//Pop back default matrix CTM: T1 * R1
+	//Pop back default matrix CTM: T1 * R1 * S1
 	glPopMatrix();
 }
 
 void drawPropellerCover(void) {
+
+	//Cope CTM onto matrix stack
 	glPushMatrix();
 
+	//T2: Translate the propeller cover
+	//CTM: T1 * R1 * S1 * T2
 	glTranslatef(1.0, 0.0, 0.0);
 
+	//R2: Rotate into right position
+	//CTM: T1 * R1 * S1 * T2 * R2
 	glRotatef(90, 0.0, 0.0, 1.0);
 
+	//R3: Rotate into right position
+	//CTM: T1 * R1 * S1 * T2 * R2 * R3
 	glRotatef(90, 1.0, 0.0, 0.0);
 
+	//S2: Scale to look desirable
+	//CTM: T1 * R1 * S1 * T2 * R2 * R3 * S2
 	glScalef(1.0, 1.0, 0.3);
 
+	//Draw the cover
 	glutSolidTorus(0.3, 1.5, 10, 50);
 
 	glPopMatrix();
@@ -271,18 +293,50 @@ void drawPropellerCover(void) {
 void drawTower(void){
 	glPushMatrix();
 
+	//T2: Translate tower above the Hull
+	//CTM: T1 * R1 * S1 * T2
 	glTranslatef(0.0, 0.2, 0.0);
 
+	//R2: Rotate into place
+	//CTM: T1 * R1 * S1 * T2 * R2
 	glRotatef(-90, 1.0, 0.0, 0.0);
 
+	//S2: Scale into desirbale shape
+	//CTM: T1 * R1 * S1 * T2 * R2
 	glScalef(0.2, 0.4, 1.0);
 	
+	//Draw tower
 	tower = gluNewQuadric();
 	gluQuadricDrawStyle(tower, GLU_LINE);
 	gluCylinder(tower, 2.0, 1.5, 2.0, 1000, 1000);
 
 	glPopMatrix();
 
+}
+
+void drawFins(void) {
+	glPushMatrix();
+
+	//T2: Translate fins to front of sub
+	//CTM: T1 * R1 * S1 * T2
+	glTranslatef(-0.7, 0.0, 0.0);
+
+	//R2: Rotate 
+	//CTM: T1 * R1 * S1 * T2 * R2
+	glRotatef(90, 1.0, 0.0, 0.0);
+
+	//R3: Rotate to face 45 degrees
+	//CTM: T1 * R1 * S1 * T2 * R2 * R3
+	glRotatef(-45, 0.0, 1.0, 0.0);
+
+	//S2: Scale to desirable shape
+	//CTM: T1 * R1 * S1 * T2 * R2 * R3, * S2
+	glScalef(0.3, 4.5, 0.1);
+
+	//Draw fins
+	glutSolidCube(1.0);
+
+	glPopMatrix();
 }
 
 

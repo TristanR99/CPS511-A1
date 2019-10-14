@@ -24,3 +24,6 @@ typedef struct CubeMesh
 	float highlightMat_shininess[1];
 
 } CubeMesh;
+
+
+CubeMesh newCube();
